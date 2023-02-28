@@ -25,9 +25,12 @@ Conceitos repassados, o foco desse projeto foi a construção de um **painel ger
 utilizadas (nesse caso mais de 100 foram construídas) em conformidade com suas funcionalidades, interações e aplicabilidades.
 Ao longo da apresentação serão exemplificados algumas das medidas mais curiosas e importantes.
 
-![DAX](https://user-images.githubusercontent.com/116115002/221635460-acddebb2-a35f-4262-8f41-d84d484d883d.png)
+
+![DAX](https://user-images.githubusercontent.com/116115002/221953224-55916203-d7b0-467d-b991-5c4f688675ca.png)
 
 ____________________________________________________________________________________________________________________________________________________________________
+
+**Análise Geral**
 
 Começo com a análise geral dos indicadores de Vendas, filtradas por ano. Avaliados Faturamento Bruto (Absoluto, anual, mensal e por categoria), Quantidade de produtos
 vendidos, _Tícket_ Médio por venda, Receita Líquida (absoluta e continental), Quantidade Notas Fiscais emitidas e Indicadores por países.
@@ -56,16 +59,17 @@ _OBS: A função RELATED proporciona fazer a medida entre colunas em tabelas dif
 Quantidade de itens Vendidos = 
     COUNTROWS(
         fVendas
-        )
+    )
 ```
 
-![Análise geral](https://user-images.githubusercontent.com/116115002/221635806-791e9e8d-2b0a-4e30-9ff2-555b9e5b7fcf.JPG)
+![Análise geral](https://user-images.githubusercontent.com/116115002/221953326-76d96537-1489-473b-b3f0-596fa8ff5ba0.JPG)
 
 ___________________________________________________________________________________________________________________________________________________________________
 
+**Análise Continental** 
+
 Na sequência, foi delimitado os KPI´s de Quantidade de Clientes, Quantidade de Vendas, Receita Líquida e Faturamento Bruto (medidas já avaliadas na análise geral)
-em numeros totais e fltrados por continente. Ainda foi delimitado os países por continente com maior margem de lucro. Todos podendo ser filtrados por ano.
-A segregação entre continentes e países foi realizada graças as variáveis que possibilitam a análise de linha e de filtro, medidas booleanas, tabelas virtuais e 
+afim de obter valores totais e fltrados por **continente**. Ainda foi delimitado os países por continente com maior margem de lucro. Todos podendo serem filtrados por ano. A segregação entre continentes e países foi realizada graças as variáveis que possibilitam a análise de linha e de filtro, medidas booleanas, tabelas virtuais e 
 outros conceitos.
 
 - **CALCULATE** (o maior curinga das medidas de contexto)
@@ -74,20 +78,19 @@ América do Norte Vendas =
     CALCULATE(  
         [05 Total Vendas Bruto];
         dLocal[Continente] = "América do Norte"
-)
+    )
 ```
 _OBS: O CALCULATE utiliza o filtro de contexto para delimitar a medida já existente_
 
 - **VALUES E EXCEPT**
 ```C
 Quant Clientes Não Positivados = 
-        COUNTROWS(
-            EXCEPT(
-            VALUES(dCliente[idCliente]);
-            VALUES(fVendas[Cliente]
-                )            
-            )
-        )  
+     COUNTROWS(
+         EXCEPT(
+         VALUES(dCliente[idCliente]);
+         VALUES(fVendas[Cliente])            
+               )
+     )  
 ```
 _OBS: Utilizei a função **COUNTROWS** para contar as linhas, filtradas pela **EXCEPT**, que por sua vez retorna apenas os valores contidos na primeira Tabela. Usando
 a função **VALUES** para retornar uma tabela virtual com valores distintos. Conceito parecido com o comando SQL left Join_
@@ -95,13 +98,13 @@ a função **VALUES** para retornar uma tabela virtual com valores distintos. Co
 - **IF E SWITCH**
 ```C
 Visão Europa = 
-        SWITCH(
-            FIRSTNONBLANK('TB Medidas'[Codigo]; "BRT");
-            "BRT"; [32 Europa Vendas];
-            "QTC"; [33 Europa Clintes Positivados];
-            "QTV"; [34 Europa Quant de Vendas];
-            "LIQ"; [35 Europa Receita Líquida]
-)
+     SWITCH(
+         FIRSTNONBLANK('TB Medidas'[Codigo]; "BRT");
+         "BRT"; [32 Europa Vendas];
+         "QTC"; [33 Europa Clintes Positivados];
+         "QTV"; [34 Europa Quant de Vendas];
+         "LIQ"; [35 Europa Receita Líquida]
+     )
 ```
 _OBS: Usei a medida Booleana **SWITCH** para filtrar em verdadeiro ou falso e retornar uma informação selecionada na segmentação de dados (o IF retorna apenas
  1 contexto). Nessa medida, utilizamos a função **FIRSTNOBLANK** para retornar o primeiro valor da coluna especificada, cuja expressão não está em branco. Dessa 
@@ -127,9 +130,11 @@ _OBS: Criei a variável **var**, utilizando a função **SUMMARIZE** para criar 
 uma coluna dessa tabela, nomeando uma coluna da tabela virtual e filtrando pela expressão já existente. Dessa forma, retornamos dessa tabela virtual com **RETURN**
 o maior valor da coluna especificada, utilizando a função **MAXX**._
 
-![Análise Continental](https://user-images.githubusercontent.com/116115002/221663394-0f054bfa-b289-4f0d-ab6d-d71e24ce9180.JPG)
+![Análise Continental](https://user-images.githubusercontent.com/116115002/221953421-11deb4f2-02e3-4099-b5dc-6e3d9cf6da06.JPG)
 
 _____________________________________________________________________________________________________________________________________________________________________
+
+**Análise de Gerentes**
 
 Nessa etapa fiz uma avaliação detalhada do desempenho de cada gerente, levando em consideração os indicadores de Faturamento Bruto (valores absolutos e
 percentual de representatividade em relação aos demais) por ano e geral.
@@ -141,7 +146,7 @@ Fat Bruto Total All dVendedor =
     CALCULATE(
         [05 Total Vendas Bruto];
         ALL(dVendedor)
-)
+    )
 ```
 _OBS: A função **ALL** retira o filtro selecionado do contexto. Com a função **ALLSELECTED**, é possível agregar um filtro externo._
 
@@ -169,20 +174,179 @@ Faturamento Top 1 =
     return    
         CALCULATE(
         [05 Total Vendas Bruto];
-        FILTER(TbGerentes;
-        [51 Ranking Gerentes] = 1
+            FILTER(TbGerentes;
+            [51 Ranking Gerentes] = 1
+            )
         )
-)
 ```
 
 _OBS: Nessa expressão a variável **var** cria uma tabela virtual excluíndo filtros com **ALL** e retorna com **return** uma **CALCULATE** com o cálculo da expressão
 a ser filtrada, utilizando o **FILTER** da tabela virtual com outra expressão. Nesse caso, para filtrar apenas a primeira ocorrência._
 
-![Análise Gerente](https://user-images.githubusercontent.com/116115002/221681549-7ca61713-1481-45e3-b3ba-74ffd183d2a4.JPG)
+![Análise Gerente](https://user-images.githubusercontent.com/116115002/221953540-c2fa7173-d30a-44f4-b252-f5c8397c252f.JPG)
+
+_____________________________________________________________________________________________________________________________________________________________________
+
+**Análise Comparativa**
+
+Essencial em uma análise de vendas é a comparação de indicadores em relação ao período e os objetivos a serem alcançados. Nessa parte do projeto, procurei comparar
+o **Faturamento X Meta X Ano Anterior** (absoluto, anual e mensal), foi possível tambem avaliar o desempenho das unidades no contexto de Meta e entre elas. Além disso
+criei um indicador que fizesse a paridade entre **Faturado e Recebido** mensalmente.
+Construímos para essas análises medidas temporais, filtradas e entre relacionamentos inativos.
+
+- **DATEADD**
+```C
+Faturamento Ano Anterior = 
+    var VVEndas =     
+        CALCULATE(
+        [57 Fat. Ano Atual];
+        DATEADD(dCalendario[Data];-1;YEAR
+               )
+        )
+
+    return
+
+        IF(
+            ISBLANK(VVendas); 
+            0;
+            VVendas
+        )
+```
+_OBS: Nesse cáculo, utilizasse a variável **var** para criar uma tabela virtual. Filtrando com **Calculate** o período a ser calculado com a expressão **DATEADD**. 
+Dessa forma retorna com **return** uma medida booleada **IF**, com **ISBLANK** para evitar que algum resultado fique (Em Branco)._
+
+- **USERELATIONSHIP**
+```C
+Total Faturamento bruto = 
+    CALCULATE(
+        [05 Total Vendas Bruto];
+        USERELATIONSHIP(
+            fVendas[Data de Faturamento];
+            dCalendario[Data])
+    ) * -1
+```
+
+_OBS: Para criarmos uma expressão entre tabelas, cujas colunas estejam em um relacionamento inativo (em virtude, na maioria dos casos, em que outro relacionamento
+primordial esteja ativo), utilizasse a medida **USERELATIONSHIP** para ativar a ligação._
+
+![Análise Comparativa](https://user-images.githubusercontent.com/116115002/221949227-ac13b4ce-e146-4d46-8870-ea26d4139df2.JPG)
+
+____________________________________________________________________________________________________________________________________________________________________
+
+**Análise Temporal**
+
+Em um projeto de performance de vendas, sempre que possível, é praticamente obrigatório a avaliação do período de dados que se tem disponível, a fim de gerar
+indicadores comparativos em uma jornada temporal. Foram levantadas informações de evolução de Receita Líquida a cada ano, a quantidade de vendas por ano e unidade e indicadores globais de performance incluíndo **YOY** (ano sobre ano) e **PY** (período anterior).
+
+- **SAMEPERIODLASTYEAR**
+```C
+Receita Liquida PY = 
+    CALCULATE(
+    [14 Receita Líquida];
+    SAMEPERIODLASTYEAR(dCalendario[Data])
+    )
+```
+_OBS: A medida **SAMEPERIODLSATYEAR** apenas retorna o valor do mesmo período do ano anterior._
 
 
+- **DATESYTD**
+```C
+Receita Líquida Acumulada Ano = 
+    CALCULATE([14 Receita Líquida];
+    DATESYTD(dCalendario[Data])
+    )
+```
 
+_OBS: Utilizei a medida **DATESYTD** para calcular a expressão acumulada ao longo do ano em questão, reiniciando o processo a cada ano._
 
+- **DATESBETWEEN**
+```C
+Receita Líquida Acumulada = 
+    CALCULATE(
+        [14 Receita Líquida];
+        DATESBETWEEN(
+            dCalendario[Data];
+            BLANK();
+            LASTDATE(dCalendario[Data])
+        )
+    )
+```
 
+_OBS: Para acumularmos os valores de uma expressão sem a barreira temporal de ano, utilizei a medida **DATESBETWEEN** como filtro da **CALCULATE**. Essa medida
+solicita a data inicial e a final a ser filtrada, sendo assim, a função **BLANK()** serve para travar a primeira data e a função **LASTDATE** para relacionar
+sempre a última data, mesmo que possa haver atualizações de lançamentos._
+
+![Análise Temporal](https://user-images.githubusercontent.com/116115002/221949308-76b8cbb1-ff3e-46d6-9a03-627245897b9b.JPG)
+
+_______________________________________________________________________________________________________________________________________________________________
+
+**Simulador de Desempenho**
+
+Um _plus_ nas análises de vendas, criei um simulador de desempenho. Nesse painel é possível movimentar os principais indicadores que impactam na Margem de Lucro
+das vendas, reutilizando apenas as medidas já criadas.
+
+- **KPIs utilizando SWITCH**
+```C
+KPI VAR Margem Lucro = 
+    SWITCH(
+        TRUE();
+        [86 Sim Var Margem de Lucro (%)] = 0; "🟡";
+        [86 Sim Var Margem de Lucro (%)] > 0; "🟢";
+        [86 Sim Var Margem de Lucro (%)] < 0; "🔴"
+    )
+```
+
+_OBS: Para criarmos KPI´s de desempenho, utilizei a função **SWICTH** para direcionar os indicadores._
+
+![Simulador](https://user-images.githubusercontent.com/116115002/221956803-675dd778-bf11-41c7-9d8c-571a4070e29b.JPG)
+
+__________________________________________________________________________________________________________________________________________________________________
+
+**Cross Sell**
+
+Por fim criei um conjunto de informações para basear a Venda Cruzada de cada sub categoria, a fim de definir quais sub categorias possuem um maior volume de vendas
+por serem faturadas na mesma compra. Para indicar essa informações utilizei uma série de medidas já observadas nesse projeto, onde juntas, geram o resultado esperado.
+
+- **INTERSECT**
+```C
+Cross Nº Vendas = 
+VAR TbVendas = Values(fVendas[idNota])
+
+VAR TbVendasAux = 
+    CALCULATETABLE(
+    Values(fVendas[idNota]);
+    ALL(dProduto);
+    USERELATIONSHIP(fVendas[Produto];'Aux Produto'[IdProduto])
+    )
+
+VAR tbInter = INTERSECT(TbVendas;TbVendasAux)
+
+VAR vResultado = COUNTROWS(tbInter)
+
+RETURN
+ 
+    IF(
+    SELECTEDVALUE(dProduto[Sub-Categoria]) <> SELECTEDVALUE('Aux Produto'[Sub-Categoria]);
+    vResultado;
+    BLANK()
+    )
+```
+![CROSS](https://user-images.githubusercontent.com/116115002/221960446-bb4bcd16-3351-4714-b64f-eda362026011.JPG)
+
+_OBS: Essa medida sintetiza um conjunto de funções já desenvolvidos no projeto, a fim de identificar uma condição de cruzamento de dados.
+A variação **var** cria uma 1ª tabela virtual, em seguida outra tabela virtual é criada utilizando o **CALCULATE** para filtrar, retirando o contexto com **ALL**
+e fazendo a ligação de colunas com relacionamento inativo, utilizando o **USERELATIONSHIP**. Com as tabelas construídas, criasse uma 3ª tabela com a função
+**INTERSECT** para filtrar apenas os dados contidos em ambas as tabelas indicadas. Utilizasse assim um outra variável **var**, com a contagem de linhas usando
+**COUNTROWS** para obter uma quantidade de valores. Dessa forma, retorna com **return**, a medida booleana **IF** para apresentar apenas os valores da expressão
+verdadeira, caso não exista valor para a expressão, a função **BLANK()** retornará (Em Branco)._
+
+![Cross Sell](https://user-images.githubusercontent.com/116115002/221963829-95f67e75-9205-470b-a379-c0d3d3876a4b.JPG)
+
+Finalizamos assim o projeto de **Performance de Vendas**. Foram utilizadas uma grande quantidade de métricas, indicadores e soluções para criar uma ferramenta que
+visa o embassamento na tomada de decições estratégicas para uma melhor administração comercial.
+ 
+_https://app.powerbi.com/view?r=eyJrIjoiYzc1N2U0NDUtYzZhOC00ZDIxLTliYTAtNDliMzI1YWViYjRkIiwidCI6ImZhZDgzMjE4LTk0YzUtNDMxMi04ZWFlLWIxNzY4OGU1M2I0ZiJ9_
+
+Segue link do painel para melhor visualização do resultado do projeto.
 
 
