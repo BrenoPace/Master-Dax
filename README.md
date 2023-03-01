@@ -32,8 +32,8 @@ ________________________________________________________________________________
 
 **Análise Geral**
 
-Começo com a análise geral dos indicadores de Vendas, filtradas por ano. Avaliados Faturamento Bruto (Absoluto, anual, mensal e por categoria), Quantidade de produtos
-vendidos, _Tícket_ Médio por venda, Receita Líquida (absoluta e continental), Quantidade Notas Fiscais emitidas e Indicadores por países.
+Começo com a análise geral dos indicadores de Vendas, filtradas por ano. Avaliados **Faturamento Bruto (Absoluto, anual, mensal e por categoria), Quantidade de produtos
+vendidos, _Tícket_ Médio por venda, Receita Líquida (absoluta e continental), Quantidade Notas Fiscais emitidas e Indicadores por países**.
 Nessa etapa foram utilizadas medidas mais simples, __mas quando bem utilizadas são extremamente úteis__, com agregações, iteradoras e contagem.
 
 - **SUM, MAX, MIN, AVERAGE, DIVIDE**
@@ -68,8 +68,8 @@ ________________________________________________________________________________
 
 **Análise Continental** 
 
-Na sequência, foi delimitado os KPI´s de Quantidade de Clientes, Quantidade de Vendas, Receita Líquida e Faturamento Bruto (medidas já avaliadas na análise geral)
-afim de obter valores totais e fltrados por **continente**. Ainda foi delimitado os países por continente com maior margem de lucro. Todos podendo serem filtrados por ano. A segregação entre continentes e países foi realizada graças as variáveis que possibilitam a análise de linha e de filtro, medidas booleanas, tabelas virtuais e 
+Na sequência, foi delimitado os KPI´s de **Quantidade de Clientes, Quantidade de Vendas, Receita Líquida e Faturamento Bruto (medidas já avaliadas na análise geral)
+afim de obter valores totais e fltrados por **continente**. Ainda foi delimitado os **países por continente com maior margem de lucro**. Todos podendo serem filtrados por ano. A segregação entre continentes e países foi realizada graças as variáveis que possibilitam a análise de linha e de filtro, medidas booleanas, tabelas virtuais e 
 outros conceitos.
 
 - **CALCULATE** (o maior curinga das medidas de contexto)
@@ -93,7 +93,8 @@ Quant Clientes Não Positivados =
      )  
 ```
 _OBS: Utilizei a função **COUNTROWS** para contar as linhas, filtradas pela **EXCEPT**, que por sua vez retorna apenas os valores contidos na primeira Tabela. Usando
-a função **VALUES** para retornar uma tabela virtual com valores distintos. Conceito parecido com o comando SQL left Join_
+a função **VALUES** para retornar uma tabela virtual (que respeita o contexto de filtro externo) com valores distintos. 
+Conceito parecido com o comando SQL left Join_
 
 - **IF E SWITCH**
 ```C
@@ -136,8 +137,8 @@ ________________________________________________________________________________
 
 **Análise de Gerentes**
 
-Nessa etapa fiz uma avaliação detalhada do desempenho de cada gerente, levando em consideração os indicadores de Faturamento Bruto (valores absolutos e
-percentual de representatividade em relação aos demais) por ano e geral.
+Nessa etapa fiz uma avaliação detalhada do desempenho de cada gerente, levando em consideração os **indicadores de Faturamento Bruto (valores absolutos e
+percentual de representatividade em relação aos demais) por ano e geral.**
 Nessas análises, foram utilizadas funções de exclusão de contexto de filtro,  _ranking_ e filtragem específica.
 
 - **ALL e ALLSELECTED**
@@ -246,7 +247,7 @@ Receita Liquida PY =
     SAMEPERIODLASTYEAR(dCalendario[Data])
     )
 ```
-_OBS: A medida **SAMEPERIODLSATYEAR** apenas retorna o valor do mesmo período do ano anterior._
+_OBS: A medida **SAMEPERIODLASTYEAR** apenas retorna o valor do mesmo período do ano anterior._
 
 
 - **DATESYTD**
@@ -334,11 +335,20 @@ RETURN
 ![CROSS](https://user-images.githubusercontent.com/116115002/221960446-bb4bcd16-3351-4714-b64f-eda362026011.JPG)
 
 _OBS: Essa medida sintetiza um conjunto de funções já desenvolvidos no projeto, a fim de identificar uma condição de cruzamento de dados.
-A variação **var** cria uma 1ª tabela virtual, em seguida outra tabela virtual é criada utilizando o **CALCULATE** para filtrar, retirando o contexto com **ALL**
-e fazendo a ligação de colunas com relacionamento inativo, utilizando o **USERELATIONSHIP**. Com as tabelas construídas, criasse uma 3ª tabela com a função
-**INTERSECT** para filtrar apenas os dados contidos em ambas as tabelas indicadas. Utilizasse assim um outra variável **var**, com a contagem de linhas usando
-**COUNTROWS** para obter uma quantidade de valores. Dessa forma, retorna com **return**, a medida booleana **IF** para apresentar apenas os valores da expressão
-verdadeira, caso não exista valor para a expressão, a função **BLANK()** retornará (Em Branco)._
+
+A variação **var** cria com a função **VALUES** uma 1ª tabela virtual (respeitando o contexto de filtro externo).
+
+Em seguida outra variável **var** cria uma tabela virtual utilizando **VALUES** e filtrando com **CALCULATETABLE**, retirando o contexto
+de filtro com **ALL** e fazendo a ligação de colunas com relacionamento inativo, utilizando o **USERELATIONSHIP**.
+
+Com as tabelas construídas, criasse uma 3ª variável com **var** onde uma tabela virtual com a função **INTERSECT** filtra apenas os dados
+contidos em ambas as tabelas indicadas anteriormente. 
+
+Utilizasse assim um última variável **var**, com a contagem de linhas usando **COUNTROWS** para obter uma quantidade de valores.
+
+Para que o resultado exclua o valor pricipal a ser filtrado, retorna com **return**, a medida booleana **IF** para apresentar apenas 
+os valores da expressão verdadeira, usando **SELECTEDVALUE** para selecionar um valor, nesse caso utilizando o <> (diferente) entre
+as colunas selecionadas, caso não exista valor para a expressão, a função **BLANK()** retornará (Em Branco)._
 
 ![Cross Sell](https://user-images.githubusercontent.com/116115002/221963829-95f67e75-9205-470b-a379-c0d3d3876a4b.JPG)
 
